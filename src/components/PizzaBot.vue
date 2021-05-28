@@ -142,7 +142,11 @@
               class="item-border-bottom"
             >
               <v-list-item-icon>
-                <img :src="getToppingIcon(topping.icon)" alt="topping.name Icon">
+                <img 
+                  :src="getToppingIcon(topping.icon)"
+                  width="24"
+                  class="mr-4"
+                  alt="topping.name Icon">
               </v-list-item-icon>
 
               <v-list-item-content>
