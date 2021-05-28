@@ -1,9 +1,9 @@
 <template>
   <v-container>
-    <v-card class="wrap mt-4 mb-4">
+    <v-card class="wrap">
       <div class="teal white--text pl-4 pr-4 pt-2 pb-1">
-        <h1>PizzaBot</h1>
-        <p><small><em>The Automatic Pizza Maker</em></small></p>
+        <h1 style="font-size: 24px;">PizzaBot</h1>
+        <p style="margin-bottom: 8px;"><small><em>The Automatic Pizza Maker</em></small></p>
       </div>
 
       <div class="wrap-inner">
@@ -297,12 +297,16 @@ export default {
 }
 
 .wrap {
+  display: flex;
+  min-height: calc(100vh - 24px);
+  flex-direction: column;
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .wrap-inner {
+  flex: 1;
   padding: 24px;
 }
 
@@ -331,9 +335,20 @@ export default {
 }
 
 .footer {
-  margin-top: 48px;
+  margin-top: 24px;
   padding: 16px;
   text-align: center;
   background: #f7f7f7;
+}
+
+@media screen and (max-width: 500px) {
+  .wrap {
+    min-height: 100vh;
+    border-radius: 0 !important;
+  }
+
+  .container {
+    padding: 0;
+  }    
 }
 </style>
