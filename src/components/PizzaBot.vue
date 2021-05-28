@@ -1,91 +1,164 @@
 <template>
   <v-container>
-    <v-card class="wrap mt-5 mb-5">
-      <div>
-        <v-select
-          v-model="toppingsQty"
-          :items="[1, 2, 3, 4, 5, 6]"
-          label="How many toppings?"
-          outlined
-          dense
-        ></v-select>
+    <v-card class="wrap mt-4 mb-4">
+      <div class="teal white--text pl-4 pr-4 pt-2 pb-1">
+        <h1>PizzaBot</h1>
+        <p><small><em>The Automatic Pizza Maker</em></small></p>
       </div>
 
-      <div class="mb-5">
-        <label class="d-block mb-2">
-          <strong class="mr-4">Meats</strong>
-          <a @click="toggleAll(meatToppings, true)"><small>All</small></a> 
-          <span> / </span>
-          <a @click="toggleAll(meatToppings, false)"><small>None</small></a>
-        </label>
-      
-        <span 
-          class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
-          :class="{'v-chip--active primary--text': topping.active}"
-          v-for="topping in meatToppings"
-          :key="topping.name"
-          @click="topping.active = !topping.active"
-        >
-          {{ topping.name }}
-        </span>
+      <div class="wrap-inner">
+        <div>
+          <label class="d-block text-overline">How many toppings?</label>
+          <v-select
+            v-model="toppingsQty"
+            :items="[1, 2, 3, 4, 5, 6]"
+            label="How many toppings?"
+            solo
+          ></v-select>
+        </div>
+
+        <label class="d-block text-overline">Customize</label>
+        <v-expansion-panels>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <span>
+                <strong class="mr-2">Meats</strong> 
+                <small>{{ meatToppingsActive.length }} / {{ meatToppings.length }}</small>
+              </span>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <span 
+                class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
+                :class="{'v-chip--active primary--text': topping.active}"
+                v-for="topping in meatToppings"
+                :key="topping.name"
+                @click="topping.active = !topping.active"
+              >
+                {{ topping.name }}
+              </span>
+
+              <hr>
+              <a @click="toggleAll(meatToppings, true)"><small>All</small></a> 
+              <span> / </span>
+              <a @click="toggleAll(meatToppings, false)"><small>None</small></a>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <span>
+                <strong class="mr-2">Veggies</strong> 
+                <small>{{ veggieToppingsActive.length }} / {{ veggieToppings.length }}</small>
+              </span>
+            </v-expansion-panel-header>
+
+            <v-expansion-panel-content>
+              <span 
+                class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
+                :class="{'v-chip--active primary--text': topping.active}"
+                v-for="topping in veggieToppings"
+                :key="topping.name"
+                @click="topping.active = !topping.active"
+              >
+                {{ topping.name }}
+              </span>
+
+              <hr>
+              <a @click="toggleAll(veggieToppings, true)"><small>All</small></a> 
+              <span> / </span>
+              <a @click="toggleAll(veggieToppings, false)"><small>None</small></a>            
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+          <v-expansion-panel class="mb-5">
+            <v-expansion-panel-header>
+              <span>
+                <strong class="mr-2">Cheeses</strong> 
+                <small>{{ cheeseToppingsActive.length }} / {{ cheeseToppings.length }}</small>
+              </span>
+            </v-expansion-panel-header>
+
+            <v-expansion-panel-content>
+              <span 
+                class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
+                :class="{'v-chip--active primary--text': topping.active}"
+                v-for="topping in cheeseToppings"
+                :key="topping.name"
+                @click="topping.active = !topping.active"
+              >
+                {{ topping.name }}
+              </span>
+
+              <hr>
+              <a @click="toggleAll(cheeseToppings, true)"><small>All</small></a> 
+              <span> / </span>
+              <a @click="toggleAll(cheeseToppings, false)"><small>None</small></a>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+        
+        <div class="form-footer mt-5">
+          <v-btn
+            @click="generatePizza"
+            :disabled="!isValid"
+            :loading="isLoading"
+            rounded
+            x-large
+            outlined
+            color="teal"
+          >
+            <img src="@/assets/food-icons/pizza-2.svg" alt="" width="40" class="mr-3">
+            Make Pizza
+          </v-btn>
+            
+          <div class="custom-error" v-if="!isValid">
+            <small class="red--text">Not enough toppings selected</small>
+          </div>
+        </div>
+
+        <v-divider class="mb-3"></v-divider>
+
+        <label class="d-block text-overline">Your Pizza</label>
+        <v-card ref="outputCard">
+          <div v-if="isLoading">
+            <v-skeleton-loader
+              v-for="n in toppingsQty"
+              :key="n"
+              type="list-item-avatar, list-item-one-line"
+              class="item-border-bottom"
+            ></v-skeleton-loader>
+          </div>
+
+          <div v-else-if="isInit">
+            <v-list-item style="height: 56px;">
+            <em>Click the button to make your first pizza</em>
+            </v-list-item> 
+          </div>
+          
+          <div v-else>
+            <v-list-item
+              v-for="topping in randToppings"
+              :key="topping.name"
+              class="item-border-bottom"
+            >
+              <v-list-item-icon>
+                <img :src="getToppingIcon(topping.icon)" alt="topping.name Icon">
+              </v-list-item-icon>
+
+              <v-list-item-content>
+                {{ topping.name }}
+              </v-list-item-content>
+            </v-list-item>
+          </div>
+        </v-card>
       </div>
 
-      <div class="mb-5">
-        <label class="d-block mb-2">
-          <strong class="mr-4">Veggies</strong>
-          <a @click="toggleAll(veggieToppings, true)"><small>All</small></a> 
-          <span> / </span>
-          <a @click="toggleAll(veggieToppings, false)"><small>None</small></a>
-        </label>
-      
-        <span 
-          class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
-          :class="{'v-chip--active primary--text': topping.active}"
-          v-for="topping in veggieToppings"
-          :key="topping.name"
-          @click="topping.active = !topping.active"
-        >
-          {{ topping.name }}
-        </span>
+      <div class="footer">
+        <small class="d-block">&copy; Copyright {{ currentYear }} Chris Gustin. All rights reserved.</small>
+        <small class="d-block">Inspired by <a href="https://www.facebook.com/automaticpizzaathens/" target="_blank">Automatic Pizza</a> in Athens, GA</small>
+        <div><small>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons" target="_blank">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">www.flaticon.com</a></small></div>
       </div>
-
-      <div class="mb-5">
-        <label class="d-block mb-2">
-          <strong class="mr-4">Cheeses</strong>
-          <a @click="toggleAll(cheeseToppings, true)"><small>All</small></a> 
-          <span> / </span>
-          <a @click="toggleAll(cheeseToppings, false)"><small>None</small></a>
-        </label>
-      
-        <span 
-          class="v-chip v-chip--clickable v-chip--no-color theme--light v-size--default mr-2 mb-4"
-          :class="{'v-chip--active primary--text': topping.active}"
-          v-for="topping in cheeseToppings"
-          :key="topping.name"
-          @click="topping.active = !topping.active"
-        >
-          {{ topping.name }}
-        </span>
-      </div>
-      
-      <div class="mt-5">
-        <v-btn
-          color="primary"
-          elevation="2"
-          @click="generatePizza"
-        >Make a Pizza</v-btn>
-      </div>
-
-      <hr class="mt-5 mb-5">
-
-      <v-card>
-        <v-list-item
-          v-for="topping in randToppings"
-          :key="topping.name"
-        >{{ topping.name }}
-        </v-list-item>
-      </v-card>
-    </v-card>
+    </v-card> 
   </v-container>
 </template>
 
@@ -95,60 +168,65 @@ import _ from 'lodash'
 export default {
   data() {
     return {
+      isInit: true,
+      isLoading: false,
       randToppings: [],
       toppingsQty: 1,
       toppings: [
-        {name: "Pepperoni", category: "meat", active: true},
-        {name: "Italian Sausage", category: "meat", active: true},
-        {name: "Ham", category: "meat", active: true},
-        {name: "Bacon", category: "meat", active: true},
-        {name: "Smoked Chicken", category: "meat", active: true},
-        {name: "Anchovies", category: "meat", active: true},
-        {name: "Meatballs", category: "meat", active: true},
-        {name: "Green Peppers", category: "veggie", active: true},
-        {name: "Onions", category: "veggie", active: true},
-        {name: "Tomatoes", category: "veggie", active: true},
-        {name: "Spinach", category: "veggie", active: true},
-        {name: "Green Olives", category: "veggie", active: true},
-        {name: "Black Olives", category: "veggie", active: true},
-        {name: "Mushrooms", category: "veggie", active: true},
-        {name: "Garlic", category: "veggie", active: true},
-        {name: "Banana Peppers", category: "veggie", active: true},
-        {name: "Jalapenos", category: "veggie", active: true},
-        {name: "Broccoli", category: "veggie", active: true},
-        {name: "Basil", category: "veggie", active: true},
-        {name: "Calobrian Peppers", category: "veggie", active: true},
-        {name: "Pineapple", category: "veggie", active: true},
-        {name: "Cherry Peppers", category: "veggie", active: true},
-        {name: "Kalamata Olives", category: "veggie", active: true},
-        {name: "Artichoke Hearts", category: "veggie", active: true},
-        {name: "Roasted Red Peppers", category: "veggie", active: true},
-        {name: "Feta", category: "cheese", active: true},
-        {name: "Extra Mozzarella", category: "cheese", active: true},
-        {name: "Dal", category: "cheese", active: true},
+        {name: "Pepperoni", category: "meat", active: true, icon: 'salami'},
+        {name: "Italian Sausage", category: "meat", active: true, icon: 'sausage'},
+        {name: "Ham", category: "meat", active: true, icon: 'ham'},
+        {name: "Bacon", category: "meat", active: true, icon: 'bacon'},
+        {name: "Smoked Chicken", category: "meat", active: true, icon: 'meat'},
+        {name: "Anchovies", category: "meat", active: true, icon: 'fish'},
+        {name: "Meatballs", category: "meat", active: true, icon: 'salami'},
+        {name: "Green Peppers", category: "veggie", active: true, icon: 'pepper'},
+        {name: "Onions", category: "veggie", active: true, icon: 'onion-1'},
+        {name: "Tomatoes", category: "veggie", active: true, icon: 'tomato'},
+        {name: "Spinach", category: "veggie", active: true, icon: 'salad-1'},
+        {name: "Green Olives", category: "veggie", active: true, icon: 'olives'},
+        {name: "Black Olives", category: "veggie", active: true, icon: 'seeds'},
+        {name: "Mushrooms", category: "veggie", active: true, icon: 'mushrooms'},
+        {name: "Garlic", category: "veggie", active: true, icon: 'garlic'},
+        {name: "Banana Peppers", category: "veggie", active: true, icon: 'chili'},
+        {name: "Jalapenos", category: "veggie", active: true, icon: 'chili'},
+        {name: "Broccoli", category: "veggie", active: true, icon: 'broccoli'},
+        {name: "Basil", category: "veggie", active: true, icon: 'salad-1'},
+        {name: "Calobrian Peppers", category: "veggie", active: true, icon: 'chili'},
+        {name: "Pineapple", category: "veggie", active: true, icon: 'pineapple'},
+        {name: "Cherry Peppers", category: "veggie", active: true, icon: 'chili'},
+        {name: "Kalamata Olives", category: "veggie", active: true, icon: 'seeds'},
+        {name: "Artichoke Hearts", category: "veggie", active: true, icon: 'onion'},
+        {name: "Roasted Red Peppers", category: "veggie", active: true, icon: 'chili'},
+        {name: "Feta", category: "cheese", active: true, icon: 'cheese-1'},
+        {name: "Extra Mozzarella", category: "cheese", active: true, icon: 'cheese-1'},
+        {name: "Dal", category: "cheese", active: true, icon: 'cheese-1'},
       ],
     }
   },
 
   methods: {
     generatePizza() {
+      // Reset variables
+      this.isInit = false
+      this.isLoading = true
       this.randToppings = []
-      // Clone the toppings array
-      var toppings2 = this.toppings.map(a => ({...a}))
+      this.$refs.outputCard.$el.style.minHeight = '56px'
 
-      // TODO Filter it
-      
-      // Shuffle it
-      this.shuffleArray(toppings2)
+      // Shuffle
+      this.shuffleArray(this.activeToppings)
 
       // Draw X values where X is toppings quantity
-      if (this.toppingsQty == 'Whatever') {
-        this.toppingsQty = Math.floor(Math.random() * 6) + 1
-      }
+      setTimeout(() => {
+        this.$refs.outputCard.$el.style.minHeight = this.$refs.outputCard.$el.clientHeight + 'px'
+        console.log(this.$refs.outputCard.$el.style.minHeight)
 
-      for (var i = 0; i < this.toppingsQty; i++) {
-        this.randToppings.push(toppings2[i])
-      }
+        for (var i = 0; i < this.toppingsQty; i++) {
+          this.randToppings.push(this.activeToppings[i])
+        }
+
+        this.isLoading = false
+      }, 500)
     },
 
     shuffleArray(array) {
@@ -163,9 +241,17 @@ export default {
         topping.active = status
       })
     },
+
+    getToppingIcon(icon) {
+      return require(`../assets/food-icons/${icon}.svg`)
+    }
   },
 
   computed: {
+    activeToppings() {
+      return this.toppings.filter(topping => topping.active == true)
+    },
+
     meatToppings() {
       return _.sortBy(this.toppings.filter(topping => topping.category == 'meat'), 'name')
     },
@@ -178,20 +264,76 @@ export default {
       return _.sortBy(this.toppings.filter(topping => topping.category == 'cheese'), 'name')
     },
 
-    isValid() {
-      return false
-      // TODO
-      // Check that at least one topping is selected
+    meatToppingsActive() {
+      return this.toppings.filter(topping => topping.category == 'meat' && topping.active == true)
     },
+
+    veggieToppingsActive() {
+      return this.toppings.filter(topping => topping.category == 'veggie' && topping.active == true)
+    },
+
+    cheeseToppingsActive() {
+      return this.toppings.filter(topping => topping.category == 'cheese' && topping.active == true)
+    },
+
+    isValid() {
+      if (this.activeToppings.length == 0 || this.activeToppings.length < this.toppingsQty) {
+        return false
+      }
+      
+      return true
+    },
+
+    currentYear() {
+      return new Date().getFullYear()
+    }
   }
 }
 </script>
 
 <style scoped>
+.v-btn--outlined {
+  border-width: 2px;
+}
+
 .wrap {
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.wrap-inner {
   padding: 24px;
+}
+
+.form-footer {
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.form-footer .custom-error {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.v-skeleton-loader {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.item-border-bottom {
+  border-bottom: 1px solid #ccc;
+}
+
+.item-border-bottom:last-child {
+  border-bottom: none;
+}
+
+.footer {
+  margin-top: 48px;
+  padding: 16px;
+  text-align: center;
+  background: #f7f7f7;
 }
 </style>
