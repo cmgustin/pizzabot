@@ -37,7 +37,8 @@
                 {{ topping.name }}
               </span>
 
-              <hr>
+              <v-divider class="mb-2"></v-divider>
+
               <a @click="toggleAll(meatToppings, true)"><small>All</small></a> 
               <span> / </span>
               <a @click="toggleAll(meatToppings, false)"><small>None</small></a>
@@ -63,7 +64,8 @@
                 {{ topping.name }}
               </span>
 
-              <hr>
+              <v-divider class="mb-2"></v-divider>
+
               <a @click="toggleAll(veggieToppings, true)"><small>All</small></a> 
               <span> / </span>
               <a @click="toggleAll(veggieToppings, false)"><small>None</small></a>            
@@ -89,7 +91,8 @@
                 {{ topping.name }}
               </span>
 
-              <hr>
+              <v-divider class="mb-2"></v-divider>
+
               <a @click="toggleAll(cheeseToppings, true)"><small>All</small></a> 
               <span> / </span>
               <a @click="toggleAll(cheeseToppings, false)"><small>None</small></a>
