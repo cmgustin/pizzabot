@@ -145,6 +145,7 @@
                 <img 
                   :src="getToppingIcon(topping.icon)"
                   width="24"
+                  height="24"
                   class="mr-4"
                   alt="topping.name Icon">
               </v-list-item-icon>
@@ -223,7 +224,6 @@ export default {
       // Draw X values where X is toppings quantity
       setTimeout(() => {
         this.$refs.outputCard.$el.style.minHeight = this.$refs.outputCard.$el.clientHeight + 'px'
-        console.log(this.$refs.outputCard.$el.style.minHeight)
 
         for (var i = 0; i < this.toppingsQty; i++) {
           this.randToppings.push(this.activeToppings[i])
